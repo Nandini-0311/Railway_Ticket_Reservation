@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Trains - Railway Ticket Reservation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div style="max-width: 800px; margin: 2rem auto;">
+            <div class="auth-card" style="padding: 2.5rem;">
+                <div class="auth-header" style="text-align: left; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                    <h2>Book Train Tickets</h2>
+                    <p>Select your origin, destination station, and journey date to browse available trains</p>
+                </div>
+
+                <div id="alert-box"></div>
+
+                <form id="train-search-form" onsubmit="executeSearch(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label for="src_station">Origin Station</label>
+                            <select id="src_station" class="form-control" required>
+                                <option value="">Loading stations...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dst_station">Destination Station</label>
+                            <select id="dst_station" class="form-control" required>
+                                <option value="">Loading stations...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="date_picker">Date of Journey</label>
+                            <input type="date" id="date_picker" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="preferred_class">Preferred Class (Optional)</label>
+                            <select id="preferred_class" class="form-control">
+                                <option value="ALL">All Classes (SL, 3A, 2A, 1A)</option>
+                                <option value="SL">Sleeper (SL)</option>
+                                <option value="3A">AC 3 Tier (3A)</option>
+                                <option value="2A">AC 2 Tier (2A)</option>
+                                <option value="1A">AC First Class (1A)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent btn-block" style="padding: 0.85rem; font-size: 1.05rem;">
+                        Search Available Trains ➔
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('date_picker');
+            dateInput.min = today;
+            dateInput.value = today;
+
+            populateStationDropdowns('src_station', 'dst_station', 1, 2);
+        });
+
+        function executeSearch(e) {
+            e.preventDefault();
+            const src = document.getElementById('src_station').value;
+            const dst = document.getElementById('dst_station').value;
+            const date = document.getElementById('date_picker').value;
+            const cls = document.getElementById('preferred_class').value;
+
+            if (src === dst) {
+                showAlert("Origin and Destination stations cannot be identical!");
+                return;
+            }
+
+            window.location.href = `/train_results.html?source=${src}&destination=${dst}&date=${date}&class=${cls}`;
+        }
+    </script>
+</body>
+</html>

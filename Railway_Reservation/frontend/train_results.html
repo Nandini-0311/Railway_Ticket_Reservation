@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Results - Railway Ticket Reservation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- SEARCH SUMMARY BANNER -->
+        <div style="background: #ffffff; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 1.25rem 1.75rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Journey Search</span>
+                <h2 id="route-title" style="font-size: 1.4rem; color: var(--primary); font-weight: 800;">Loading route...</h2>
+                <p id="route-subtitle" style="color: var(--text-muted); font-size: 0.95rem;">Checking live train schedules...</p>
+            </div>
+            <div>
+                <a href="/search_train.html" class="btn btn-secondary btn-sm">Modify Search</a>
+            </div>
+        </div>
+
+        <div id="alert-box"></div>
+
+        <!-- RESULTS LIST -->
+        <div id="trains-container">
+            <p style="text-align: center; padding: 3rem; color: var(--text-muted);">Fetching trains from reservation database...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndRenderTrains();
+        });
+
+        async function fetchAndRenderTrains() {
+            const params = new URLSearchParams(window.location.search);
+            const source = params.get('source');
+            const dest = params.get('destination');
+            const date = params.get('date');
+
+            if (!source || !dest || !date) {
+                showAlert("Missing search parameters. Please start from the train search page.");
+                return;
+            }
+
+            const data = await API.get(`/api/trains/search?source=${source}&destination=${dest}&date=${date}`);
+            const container = document.getElementById('trains-container');
+
+            if (!data.success) {
+                showAlert(data.error || "Failed to find trains.");
+                container.innerHTML = `<div style="text-align:center; padding: 3rem; color: var(--danger);">${data.error}</div>`;
+                return;
+            }
+
+            // Update header info
+            document.getElementById('route-title').innerText = `${data.source.station_name} (${data.source.station_code}) ➔ ${data.destination.station_name} (${data.destination.station_code})`;
+            document.getElementById('route-subtitle').innerText = `Date: ${data.journey_date} | ${data.total_trains} Available Train(s) Found`;
+
+            if (data.total_trains === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 4rem 1rem; background: #ffffff; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <span style="font-size: 3rem;">🚫</span>
+                        <h3 style="color: var(--primary); font-size: 1.3rem; margin: 1rem 0 0.5rem 0;">No Trains Operating on Selected Day</h3>
+                        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">
+                            There are no active scheduled trains running between these stations on this specific day of the week. Please try another date.
+                        </p>
+                        <a href="/search_train.html" class="btn btn-primary">Change Date or Route</a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.trains.forEach(t => {
+                html += `
+                    <div class="train-card">
+                        <div class="train-header">
+                            <div class="train-name-block">
+                                <h3>
+                                    <span class="train-number-badge">${t.train_number}</span>
+                                    ${t.train_name}
+                                </h3>
+                            </div>
+                            <div>
+                                <span class="train-type-badge">${t.train_type || 'Superfast'}</span>
+                            </div>
+                        </div>
+
+                        <div class="train-route-row">
+                            <div class="route-stop">
+                                <span class="time">${t.departure_time}</span>
+                                <span class="station-name">${t.source_name} (${t.source_code})</span>
+                            </div>
+
+                            <div class="route-duration">
+                                <span>${t.duration_formatted}</span>
+                                <div class="line-bar"></div>
+                                <span style="font-size: 0.8rem; color: var(--success); font-weight: 600;">Runs Today</span>
+                            </div>
+
+                            <div class="route-stop" style="text-align: right;">
+                                <span class="time">${t.arrival_time}</span>
+                                <span class="station-name">${t.destination_name} (${t.destination_code})</span>
+                            </div>
+                        </div>
+
+                        <!-- CLASS SEAT CARDS -->
+                        <div class="class-grid">
+                            ${renderClassCard(t, 'SL', data.journey_date, data.source.station_id, data.destination.station_id)}
+                            ${renderClassCard(t, '3A', data.journey_date, data.source.station_id, data.destination.station_id)}
+                            ${renderClassCard(t, '2A', data.journey_date, data.source.station_id, data.destination.station_id)}
+                            ${renderClassCard(t, '1A', data.journey_date, data.source.station_id, data.destination.station_id)}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderClassCard(train, classCode, date, srcId, dstId) {
+            const cls = train.classes[classCode];
+            if (!cls || cls.fare <= 0) return '';
+
+            const isAvailable = cls.available_seats > 0;
+            const statusClass = isAvailable ? 'status-avail' : 'status-regret';
+            const statusText = isAvailable ? `AVL ${cls.available_seats}` : 'REGRET';
+
+            const bookUrl = `/booking.html?train_id=${train.train_id}&date=${date}&class=${classCode}&src=${srcId}&dst=${dstId}`;
+
+            return `
+                <div class="class-card" style="${!isAvailable ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
+                    <div class="class-name">${classCode}</div>
+                    <div class="fare">₹${cls.fare}</div>
+                    <span class="seat-status ${statusClass}">${statusText}</span>
+                    ${isAvailable ? `
+                        <div style="margin-top: 0.6rem;">
+                            <a href="${bookUrl}" class="btn btn-accent btn-sm btn-block" style="padding: 0.35rem 0.5rem; font-size: 0.85rem; text-decoration: none;">Book</a>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

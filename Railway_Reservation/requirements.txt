@@ -1,0 +1,4 @@
+# Railway Ticket Reservation System
+# Required Python Dependencies
+
+mysql-connector-python>=8.0.33

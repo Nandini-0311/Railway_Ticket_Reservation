@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveler Dashboard - Railway Ticket Reservation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- WELCOME HEADER -->
+        <div style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #ffffff; padding: 2rem 2.5rem; border-radius: 12px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="font-size: 0.85rem; opacity: 0.85; text-transform: uppercase; font-weight: 600;">Passenger Control Hub</span>
+                <h1 id="welcome-title" style="font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem;">Welcome, Traveler</h1>
+                <p id="user-contact" style="font-size: 0.95rem; opacity: 0.85; margin-top: 0.25rem;">Loading account details...</p>
+            </div>
+            <div>
+                <a href="/search_train.html" class="btn btn-accent">Book New Ticket ➔</a>
+            </div>
+        </div>
+
+        <div id="alert-box"></div>
+
+        <!-- QUICK METRICS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Bookings</span>
+                <div class="stat-value" id="stat-total-bookings">0</div>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Lifetime reservations</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Active / Confirmed Trips</span>
+                <div class="stat-value" id="stat-confirmed-trips" style="color: var(--success);">0</div>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Upcoming journeys</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Cancelled Tickets</span>
+                <div class="stat-value" id="stat-cancelled-trips" style="color: var(--danger);">0</div>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Refunds disbursed</span>
+            </div>
+        </div>
+
+        <!-- RECENT BOOKINGS TABLE -->
+        <div style="background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Recent Reservations</h2>
+                <a href="/booking_history.html" style="color: var(--accent); font-weight: 600; font-size: 0.9rem; text-decoration: none;">View All Trips →</a>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="ticket-table" id="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>PNR Number</th>
+                            <th>Train</th>
+                            <th>Route</th>
+                            <th>Journey Date</th>
+                            <th>Class</th>
+                            <th>Fare</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-tbody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading your bookings...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Session.getUser();
+            if (!user) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            document.getElementById('welcome-title').innerText = `Welcome, ${user.full_name}`;
+            document.getElementById('user-contact').innerText = `Email: ${user.email} | Mobile: +91 ${user.phone}`;
+
+            // Fetch user booking history
+            const res = await API.get('/api/bookings/my_bookings');
+            if (!res.success) {
+                showAlert(res.error || "Cannot load bookings.");
+                return;
+            }
+
+            const bookings = res.bookings || [];
+            let confirmedCount = 0;
+            let cancelledCount = 0;
+
+            bookings.forEach(b => {
+                if (b.booking_status === 'CONFIRMED') confirmedCount++;
+                if (b.booking_status === 'CANCELLED') cancelledCount++;
+            });
+
+            document.getElementById('stat-total-bookings').innerText = bookings.length;
+            document.getElementById('stat-confirmed-trips').innerText = confirmedCount;
+            document.getElementById('stat-cancelled-trips').innerText = cancelledCount;
+
+            const tbody = document.getElementById('bookings-tbody');
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            You have not booked any train tickets yet. <br>
+                            <a href="/search_train.html" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Book Your First Ticket</a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let rows = '';
+            bookings.slice(0, 5).forEach(b => {
+                const statusBadge = b.booking_status === 'CONFIRMED'
+                    ? '<span class="badge badge-success">CONFIRMED</span>'
+                    : '<span class="badge badge-danger">CANCELLED</span>';
+
+                rows += `
+                    <tr>
+                        <td style="font-weight: 800; letter-spacing: 1px; color: var(--primary);">${b.pnr_number}</td>
+                        <td><strong>${b.train_number}</strong> - ${b.train_name}</td>
+                        <td>${b.source_code} ➔ ${b.destination_code}</td>
+                        <td>${b.journey_date}</td>
+                        <td><span style="font-weight: 700;">${b.class_type}</span></td>
+                        <td style="font-weight: 700;">₹${b.total_fare.toFixed(2)}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <a href="/ticket.html?pnr=${b.pnr_number}" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">View Ticket</a>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = rows;
+        });
+    </script>
+</body>
+</html>

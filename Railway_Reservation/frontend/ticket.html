@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electronic Reservation Slip (ERS) - Ticket</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar no-print">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- TOP ACTIONS (PRINT & HISTORY) -->
+        <div class="no-print" style="max-width: 800px; margin: 0 auto 1.5rem auto; display: flex; justify-content: space-between; align-items: center;">
+            <a href="/booking_history.html" class="btn btn-secondary btn-sm">← Back to My Trips</a>
+            <div style="display: flex; gap: 0.75rem;">
+                <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print Ticket</button>
+                <button id="cancel-ticket-btn" onclick="initiateCancellation()" class="btn btn-danger btn-sm" style="display: none;">Cancel Ticket</button>
+            </div>
+        </div>
+
+        <div id="alert-box" style="max-width: 800px; margin: 0 auto 1rem auto;"></div>
+
+        <!-- E-TICKET CARD -->
+        <div class="ticket-wrapper" id="ticket-content">
+            <p style="text-align: center; padding: 3rem; color: var(--text-muted);">Retrieving official reservation slip...</p>
+        </div>
+    </main>
+
+    <footer class="footer no-print">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        let currentBooking = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTicketDetails();
+        });
+
+        async function loadTicketDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const pnr = params.get('pnr');
+
+            if (!pnr) {
+                showAlert("Missing PNR query parameter. Please enter a valid PNR.");
+                return;
+            }
+
+            const res = await API.get(`/api/bookings/pnr_status?pnr=${pnr}`);
+            const container = document.getElementById('ticket-content');
+
+            if (!res.success) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 4rem 1rem; color: var(--danger);">
+                        <span style="font-size: 3rem;">⚠️</span>
+                        <h3 style="margin-top: 1rem;">Ticket Not Found</h3>
+                        <p style="color: var(--text-muted);">${res.error}</p>
+                        <a href="/pnr_status.html" class="btn btn-primary" style="margin-top: 1.5rem;">Check Another PNR</a>
+                    </div>
+                `;
+                return;
+            }
+
+            currentBooking = res.booking;
+            const b = currentBooking;
+
+            // Show cancel button only if confirmed
+            if (b.booking_status === 'CONFIRMED') {
+                document.getElementById('cancel-ticket-btn').style.display = 'inline-flex';
+            }
+
+            const statusBadge = b.booking_status === 'CONFIRMED' 
+                ? '<span class="badge badge-success">CONFIRMED (CNF)</span>' 
+                : '<span class="badge badge-danger">CANCELLED</span>';
+
+            let cancelSection = '';
+            if (b.booking_status === 'CANCELLED' && b.cancellation_details) {
+                const c = b.cancellation_details;
+                cancelSection = `
+                    <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.5rem;">
+                        <h4 style="color: var(--danger); font-size: 1rem; margin-bottom: 0.4rem;">Ticket Cancellation & Refund Audit</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; font-size: 0.9rem;">
+                            <div><strong>Cancelled On:</strong> ${c.cancelled_at}</div>
+                            <div><strong>Deduction (15%):</strong> ₹${c.cancellation_charge.toFixed(2)}</div>
+                            <div><strong>Refunded Amount:</strong> <span style="color: var(--success); font-weight: 700;">₹${c.refund_amount.toFixed(2)}</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Build passenger rows
+            let passengerRows = '';
+            b.passengers.forEach((p, idx) => {
+                passengerRows += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td style="font-weight: 700;">${p.passenger_name}</td>
+                        <td>${p.age} / ${p.gender}</td>
+                        <td><span style="font-weight: 800; color: var(--primary);">${p.seat_number}</span></td>
+                        <td>${p.berth_preference}</td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = `
+                <!-- HEADER BANNER -->
+                <div class="ticket-header-banner">
+                    <div>
+                        <div style="font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.85;">Electronic Reservation Slip (ERS)</div>
+                        <h2 style="font-size: 1.4rem; font-weight: 800; margin-top: 0.2rem;">RailReserve India Portal</h2>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.78rem; opacity: 0.85; margin-bottom: 0.2rem;">PNR NUMBER</div>
+                        <div class="ticket-pnr-box">${b.pnr_number}</div>
+                    </div>
+                </div>
+
+                <!-- TICKET DETAILS BODY -->
+                <div class="ticket-body">
+                    
+                    <div class="ticket-grid">
+                        <div class="ticket-info-item">
+                            <div class="label">Train Details</div>
+                            <div class="value">${b.train_number} - ${b.train_name}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">${b.train_type || 'Superfast'}</div>
+                        </div>
+
+                        <div class="ticket-info-item">
+                            <div class="label">Date of Journey</div>
+                            <div class="value">${b.journey_date}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Class: <strong>${b.class_type}</strong></div>
+                        </div>
+
+                        <div class="ticket-info-item">
+                            <div class="label">Boarding Station (Departure)</div>
+                            <div class="value">${b.source_name} (${b.source_code})</div>
+                            <div style="font-size: 0.85rem; color: var(--primary); font-weight: 700;">Departure: ${b.departure_time || '16:55'}</div>
+                        </div>
+
+                        <div class="ticket-info-item">
+                            <div class="label">Destination Station (Arrival)</div>
+                            <div class="value">${b.destination_name} (${b.destination_code})</div>
+                            <div style="font-size: 0.85rem; color: var(--primary); font-weight: 700;">Arrival: ${b.arrival_time || '08:35'}</div>
+                        </div>
+                    </div>
+
+                    <!-- PASSENGERS TABLE -->
+                    <h3 style="font-size: 1.1rem; color: var(--primary); font-weight: 800; border-bottom: 1.5px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 1.5rem;">
+                        Passenger Reservation Chart
+                    </h3>
+
+                    <table class="ticket-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Passenger Name</th>
+                                <th>Age / Gender</th>
+                                <th>Coach / Seat</th>
+                                <th>Berth</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${passengerRows}
+                        </tbody>
+                    </table>
+
+                    <!-- FINANCIAL & PAYMENT SECTION -->
+                    <div style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Transaction ID: <strong>${b.payment ? b.payment.transaction_id : 'N/A'}</strong></div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Payment Mode: <strong>${b.payment ? b.payment.payment_method : 'UPI'}</strong> (Simulated)</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Booked by: <strong>${b.booked_by_name || 'Passenger'}</strong> on ${b.booked_at}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Total Ticket Fare</div>
+                            <div style="font-size: 1.6rem; font-weight: 800; color: var(--primary);">₹${b.total_fare.toFixed(2)}</div>
+                        </div>
+                    </div>
+
+                    ${cancelSection}
+
+                    <div style="margin-top: 2rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 0.85rem;">
+                        <strong>Instructions:</strong> Please carry an authentic Government-issued Photo Identity card (Aadhaar, Voter ID, Passport) during your journey. This computer-generated academic ticket does not require a physical signature.
+                    </div>
+                </div>
+            `;
+        }
+
+        async function initiateCancellation() {
+            if (!currentBooking) return;
+
+            const fee = (currentBooking.total_fare * 0.15).toFixed(2);
+            const refund = (currentBooking.total_fare - fee).toFixed(2);
+
+            const confirmMsg = `Are you sure you want to cancel this ticket (PNR: ${currentBooking.pnr_number})?\n\nTotal Fare: ₹${currentBooking.total_fare}\nCancellation Deduction (15%): ₹${fee}\nEstimated Refund: ₹${refund}\n\nSeats will be immediately returned to the public inventory.`;
+
+            if (!confirm(confirmMsg)) return;
+
+            const res = await API.post('/api/bookings/cancel', {
+                pnr_number: currentBooking.pnr_number,
+                reason: "User cancelled via e-ticket interface"
+            });
+
+            if (res.success) {
+                alert(`Ticket Cancelled Successfully!\nRefund of ₹${res.refund_amount} has been initiated.`);
+                window.location.reload();
+            } else {
+                showAlert(res.error || "Failed to cancel ticket.");
+            }
+        }
+    </script>
+</body>
+</html>

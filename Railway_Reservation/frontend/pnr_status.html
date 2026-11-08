@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check PNR Status - Railway Ticket Reservation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div style="max-width: 650px; margin: 3rem auto;">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>PNR Status Enquiry</h2>
+                    <p>Enter your 10-digit Passenger Name Record (PNR) number</p>
+                </div>
+
+                <div id="alert-box"></div>
+
+                <form onsubmit="handlePNRSearch(event)">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="pnr_input">10-Digit PNR Number</label>
+                        <input type="text" id="pnr_input" class="form-control" placeholder="e.g., 8219472015" maxlength="10" style="font-size: 1.15rem; font-weight: 700; letter-spacing: 2px; text-align: center;" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent btn-block" style="padding: 0.85rem; font-size: 1.05rem;">
+                        Check Status Now ➔
+                    </button>
+                </form>
+
+                <div style="margin-top: 2rem; background: #f8fafc; border: 1px dashed var(--border-color); border-radius: 8px; padding: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                    <strong>💡 How to find your PNR?</strong>
+                    Your 10-digit PNR is printed at the top-left corner of your Electronic Reservation Slip (ERS) or confirmation receipt.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        function handlePNRSearch(e) {
+            e.preventDefault();
+            clearAlert();
+
+            const pnr = document.getElementById('pnr_input').value.trim();
+
+            if (!Validator.isValidPNR(pnr)) {
+                showAlert("Please enter a valid 10-digit numeric PNR number.");
+                return;
+            }
+
+            window.location.href = `/ticket.html?pnr=${pnr}`;
+        }
+    </script>
+</body>
+</html>

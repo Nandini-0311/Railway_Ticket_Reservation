@@ -1,0 +1,758 @@
+/* ==============================================================
+   RAILWAY TICKET RESERVATION SYSTEM - MODERN STYLESHEET
+   Author: Senior Full-Stack Engineer / Final-Year Project
+   ============================================================== */
+
+:root {
+    --primary: #0b2545;          /* Deep Railway Navy */
+    --primary-light: #134074;    /* Slate Blue */
+    --accent: #c5221f;           /* Crimson Red */
+    --accent-hover: #a51815;     /* Darker Crimson */
+    --bg-light: #f4f7fb;         /* Soft Cool Gray */
+    --card-bg: #ffffff;
+    --text-main: #1e293b;        /* Charcoal */
+    --text-muted: #64748b;       /* Cool Slate */
+    --border-color: #e2e8f0;
+    --success: #059669;          /* Emerald Green */
+    --warning: #d97706;          /* Amber */
+    --danger: #dc2626;           /* Red */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+    --radius: 8px;
+    --font-sans: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==============================================================
+   NAVIGATION BAR
+   ============================================================== */
+.navbar {
+    background-color: var(--primary);
+    color: #ffffff;
+    padding: 0.85rem 2rem;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.nav-brand-icon {
+    background: var(--accent);
+    color: #ffffff;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.25rem;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    list-style: none;
+}
+
+.nav-links a {
+    color: #e2e8f0;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-nav-accent {
+    background-color: var(--accent);
+    color: #ffffff !important;
+    padding: 0.45rem 1rem !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    transition: background 0.2s ease !important;
+}
+
+.btn-nav-accent:hover {
+    background-color: var(--accent-hover) !important;
+}
+
+/* ==============================================================
+   PAGE CONTAINERS & LAYOUT
+   ============================================================== */
+.main-content {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1.25rem;
+}
+
+/* ==============================================================
+   HERO & SEARCH WIDGET (HOME & SEARCH PAGES)
+   ============================================================== */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: #ffffff;
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+}
+
+.hero-section p {
+    font-size: 1.15rem;
+    color: #cbd5e1;
+    max-width: 650px;
+    margin: 0 auto 1.5rem auto;
+}
+
+.disclaimer-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+}
+
+/* SEARCH FORM CARD */
+.search-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    margin-top: -3.5rem;
+    position: relative;
+    z-index: 10;
+    border: 1px solid var(--border-color);
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) 160px;
+    gap: 1.25rem;
+    align-items: flex-end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: var(--text-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.15);
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+/* ==============================================================
+   BUTTONS
+   ============================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+.btn-primary:hover {
+    background-color: var(--primary-light);
+}
+
+.btn-accent {
+    background-color: var(--accent);
+    color: #ffffff;
+}
+.btn-accent:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: var(--text-main);
+}
+.btn-secondary:hover {
+    background-color: #cbd5e1;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: #ffffff;
+}
+.btn-success:hover {
+    background-color: #047857;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+/* ==============================================================
+   TRAIN RESULTS LISTINGS & CARDS
+   ============================================================== */
+.train-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.train-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.train-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.train-name-block h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.train-number-badge {
+    background: var(--primary-light);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+}
+
+.train-type-badge {
+    background: #e2e8f0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.train-route-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.route-stop {
+    display: flex;
+    flex-direction: column;
+}
+
+.route-stop .time {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.route-stop .station-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.route-duration {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.route-duration .line-bar {
+    width: 140px;
+    height: 2px;
+    background: var(--border-color);
+    position: relative;
+    margin: 0.4rem auto;
+}
+
+.route-duration .line-bar::after {
+    content: '➔';
+    position: absolute;
+    top: -9px;
+    right: -5px;
+    font-size: 12px;
+    color: var(--primary-light);
+}
+
+/* CLASS TICKET CARDS */
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.85rem;
+}
+
+.class-card {
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.85rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fafbfc;
+}
+
+.class-card:hover,
+.class-card.selected {
+    border-color: var(--accent);
+    background: #fff5f5;
+}
+
+.class-card .class-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.class-card .fare {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.class-card .seat-status {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.status-avail {
+    background: #ecfdf5;
+    color: var(--success);
+}
+
+.status-regret {
+    background: #fef2f2;
+    color: var(--danger);
+}
+
+/* ==============================================================
+   AUTHENTICATION FORMS (LOGIN / REGISTER)
+   ============================================================== */
+.auth-wrapper {
+    max-width: 480px;
+    margin: 3rem auto;
+}
+
+.auth-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2.25rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+
+.auth-header h2 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.auth-header p {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-footer a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ==============================================================
+   PASSENGER BOOKING FORM
+   ============================================================== */
+.passenger-card {
+    background: #fafbfc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.passenger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.passenger-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.25fr;
+    gap: 0.85rem;
+}
+
+/* SUMMARY BOX */
+.fare-summary-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 5.5rem;
+}
+
+.fare-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.fare-row.total {
+    border-top: 2px solid var(--border-color);
+    padding-top: 0.85rem;
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+/* ==============================================================
+   CONFIRMED TICKET STYLING (PRINT READY)
+   ============================================================== */
+.ticket-wrapper {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    border: 1.5px solid #cbd5e1;
+    overflow: hidden;
+}
+
+.ticket-header-banner {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-pnr-box {
+    background: #ffffff;
+    color: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: 1.5px;
+}
+
+.ticket-body {
+    padding: 2rem;
+}
+
+.ticket-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-info-item .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.ticket-info-item .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.ticket-table th,
+.ticket-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ticket-table th {
+    background: #f8fafc;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.badge-success {
+    background: #ecfdf5;
+    color: var(--success);
+}
+
+.badge-danger {
+    background: #fef2f2;
+    color: var(--danger);
+}
+
+/* ==============================================================
+   DASHBOARD STATS & CARDS (USER & ADMIN)
+   ============================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-card .stat-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0.4rem 0;
+}
+
+.tabs-container {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -2px;
+}
+
+.tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ==============================================================
+   FOOTER
+   ============================================================== */
+.footer {
+    background: var(--primary);
+    color: #cbd5e1;
+    text-align: center;
+    padding: 2rem 1.5rem;
+    margin-top: auto;
+    font-size: 0.9rem;
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* PRINT MEDIA */
+@media print {
+    body {
+        background: #ffffff;
+    }
+    .navbar, .footer, .no-print {
+        display: none !important;
+    }
+    .ticket-wrapper {
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* RESPONSIVE QUERIES */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .search-grid {
+        grid-template-columns: 1fr;
+    }
+    .passenger-row {
+        grid-template-columns: 1fr;
+    }
+    .ticket-grid {
+        grid-template-columns: 1fr;
+    }
+}

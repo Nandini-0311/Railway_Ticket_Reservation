@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Ticket Reservation Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links">
+                <!-- Dynamically populated by validation.js -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN BODY -->
+    <main class="main-content">
+        
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+            <span class="disclaimer-badge"></span>
+            <h1>Book Your Train Tickets Easily & Securely</h1>
+            <p>Fast, reliable railway reservation across all major routes. Check live seat availability, manage PNRs, and travel with peace of mind.</p>
+        </section>
+
+        <!-- SEARCH FORM CARD -->
+        <section class="search-card">
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 1.25rem;">Search Trains & Check Availability</h2>
+            <div id="alert-box"></div>
+            
+            <form id="home-search-form" onsubmit="handleSearch(event)">
+                <div class="search-grid">
+                    <div class="form-group">
+                        <label for="source_station">From Station</label>
+                        <select id="source_station" class="form-control" required>
+                            <option value="">Loading stations...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dest_station">To Station</label>
+                        <select id="dest_station" class="form-control" required>
+                            <option value="">Loading stations...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="journey_date">Journey Date</label>
+                        <input type="date" id="journey_date" class="form-control" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent btn-block" style="height: 46px;">
+                        Find Trains
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- SERVICES & FEATURES -->
+        <section style="margin-top: 4rem;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">Key Reservation Services</h2>
+                <p style="color: var(--text-muted);">Everything you need for hassle-free railway booking</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</span>
+                    <h3 style="font-size: 1.15rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">Train Route Search</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Lookup direct and intermediate trains with schedules, departure/arrival times, and travel durations.</p>
+                </div>
+
+                <div class="stat-card">
+                    <span style="font-size: 2rem; margin-bottom: 0.5rem;">💺</span>
+                    <h3 style="font-size: 1.15rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">Real-Time Availability</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Live seat tracking across Sleeper (SL), 3A, 2A, and First Class (1A) with zero overbooking.</p>
+                </div>
+
+                <div class="stat-card">
+                    <span style="font-size: 2rem; margin-bottom: 0.5rem;">🎫</span>
+                    <h3 style="font-size: 1.15rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">Instant 10-Digit PNR</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Automated unique PNR generation with confirmed passenger manifests and printable e-tickets.</p>
+                </div>
+
+                <div class="stat-card">
+                    <span style="font-size: 2rem; margin-bottom: 0.5rem;">🔄</span>
+                    <h3 style="font-size: 1.15rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">Easy Cancellation</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">One-click ticket cancellation with instant seat inventory restoration and automated refund calculation.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+        <p style="font-size: 0.8rem; margin-top: 0.35rem; opacity: 0.8;">Not affiliated with IRCTC or Ministry of Railways</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set min date to today
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('journey_date');
+            dateInput.min = today;
+            dateInput.value = today;
+
+            // Load stations
+            populateStationDropdowns('source_station', 'dest_station', 1, 2);
+        });
+
+        function handleSearch(e) {
+            e.preventDefault();
+            const src = document.getElementById('source_station').value;
+            const dst = document.getElementById('dest_station').value;
+            const date = document.getElementById('journey_date').value;
+
+            if (src === dst) {
+                showAlert("Source and Destination stations cannot be the same!");
+                return;
+            }
+
+            window.location.href = `/train_results.html?source=${src}&destination=${dst}&date=${date}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings & Trips - Railway Ticket Reservation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 1.75rem; color: var(--primary); font-weight: 800;">My Travel History</h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Review all confirmed and cancelled bookings, view e-tickets, or process cancellations</p>
+            </div>
+            <div>
+                <a href="/search_train.html" class="btn btn-accent btn-sm">Book New Train ➔</a>
+            </div>
+        </div>
+
+        <div id="alert-box"></div>
+
+        <div style="background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <div style="overflow-x: auto;">
+                <table class="ticket-table">
+                    <thead>
+                        <tr>
+                            <th>PNR Number</th>
+                            <th>Train</th>
+                            <th>Journey Route</th>
+                            <th>Journey Date</th>
+                            <th>Class</th>
+                            <th>Passengers</th>
+                            <th>Fare</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading trips...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Session.getUser();
+            if (!user) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const res = await API.get('/api/bookings/my_bookings');
+            const tbody = document.getElementById('history-tbody');
+
+            if (!res.success) {
+                showAlert(res.error || "Cannot load history.");
+                return;
+            }
+
+            const bookings = res.bookings || [];
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                            <span style="font-size: 2.5rem;">🚆</span>
+                            <h3 style="margin-top: 0.75rem; color: var(--primary);">No Trips Found</h3>
+                            <p style="margin-bottom: 1.25rem;">You haven't reserved any train tickets yet.</p>
+                            <a href="/search_train.html" class="btn btn-primary btn-sm">Book a Ticket Now</a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            bookings.forEach(b => {
+                const isConfirmed = b.booking_status === 'CONFIRMED';
+                const statusBadge = isConfirmed
+                    ? '<span class="badge badge-success">CONFIRMED</span>'
+                    : '<span class="badge badge-danger">CANCELLED</span>';
+
+                html += `
+                    <tr>
+                        <td style="font-weight: 800; letter-spacing: 1px; color: var(--primary);">${b.pnr_number}</td>
+                        <td><strong>${b.train_number}</strong><br><small style="color: var(--text-muted);">${b.train_name}</small></td>
+                        <td>${b.source_code} ➔ ${b.destination_code}</td>
+                        <td>${b.journey_date}</td>
+                        <td><strong>${b.class_type}</strong></td>
+                        <td>${b.total_passengers}</td>
+                        <td style="font-weight: 700;">₹${b.total_fare.toFixed(2)}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <a href="/ticket.html?pnr=${b.pnr_number}" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">E-Ticket</a>
+                                ${isConfirmed ? `<button onclick="cancelBooking('${b.pnr_number}', ${b.total_fare})" class="btn btn-danger btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Cancel</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        });
+
+        async function cancelBooking(pnr, fare) {
+            const deduction = (fare * 0.15).toFixed(2);
+            const refund = (fare - deduction).toFixed(2);
+
+            if (!confirm(`Confirm cancellation of PNR: ${pnr}?\n\nFare: ₹${fare}\nDeduction (15%): ₹${deduction}\nRefund: ₹${refund}`)) {
+                return;
+            }
+
+            const res = await API.post('/api/bookings/cancel', {
+                pnr_number: pnr,
+                reason: "User cancelled via booking history"
+            });
+
+            if (res.success) {
+                alert(`Ticket Cancelled! Refund of ₹${res.refund_amount} has been initiated.`);
+                window.location.reload();
+            } else {
+                showAlert(res.error || "Cancellation failed.");
+            }
+        }
+    </script>
+</body>
+</html>

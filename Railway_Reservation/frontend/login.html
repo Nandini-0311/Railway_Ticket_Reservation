@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveler Login - Railway Ticket Reservation</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon">🚆</span>
+                <span>RailReserve Portal</span>
+            </a>
+            <div class="nav-links" id="navbar-auth-links"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Passenger Login</h2>
+                    <p>Enter your credentials to manage bookings</p>
+                </div>
+
+                <!-- QUICK DEMO HELPER BOX -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #1e40af;">
+                    <strong>💡 Demo Traveler Account:</strong><br>
+                    Email: <code>maggi123@gmail.com</code> or <code>traveler@example.com</code><br>
+                    Password: <code>traveler123</code> (or click demo fill below)<br>
+                    <button type="button" onclick="fillDemoTraveler()" style="background: #2563eb; color: #fff; border: none; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.78rem; font-weight: 600; margin-top: 0.4rem; cursor: pointer;">⚡ Auto-Fill Demo Traveler</button>
+                </div>
+
+                <div id="alert-box"></div>
+
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="identifier">Email Address or Mobile Number</label>
+                        <input type="text" id="identifier" class="form-control" placeholder="e.g., traveler@example.com or 9876543210" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+                    </div>
+
+                    <button type="submit" id="login-btn" class="btn btn-primary btn-block">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>New traveler? <a id="register-link" href="/register.html">Create an Account</a></p>
+                    <p style="margin-top: 0.5rem;"><a href="/admin_login.html" style="color: var(--text-muted); font-size: 0.85rem;">Railway Official Login →</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Railway Ticket Reservation System</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect');
+        
+        // Pass redirect parameter to register link if present
+        if (redirectParam) {
+            document.getElementById('register-link').href = `/register.html?redirect=${encodeURIComponent(redirectParam)}`;
+        }
+
+        // Redirect if already logged in
+        if (Session.getUser()) {
+            window.location.href = redirectParam || '/user_dashboard.html';
+        }
+
+        function fillDemoTraveler() {
+            document.getElementById('identifier').value = 'traveler@example.com';
+            document.getElementById('password').value = 'traveler123';
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            clearAlert();
+
+            const identifier = document.getElementById('identifier').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('login-btn');
+
+            btn.disabled = true;
+            btn.innerText = "Signing in...";
+
+            const res = await API.post('/api/login', { identifier, password });
+
+            btn.disabled = false;
+            btn.innerText = "Sign In";
+
+            if (res.success) {
+                Session.setUser(res.user, res.session_token);
+                // Check if redirect URL exists
+                const target = redirectParam || '/user_dashboard.html';
+                window.location.href = target;
+            } else {
+                showAlert(res.error || "Login failed. Check credentials.");
+            }
+        }
+    </script>
+</body>
+</html>

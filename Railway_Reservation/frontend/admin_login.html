@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Login - Railway Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="background: #0b192c;">
+
+    <nav class="navbar" style="background: #081220;">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-brand">
+                <span class="nav-brand-icon" style="background: #2563eb;">⚙️</span>
+                <span>RailReserve Staff Portal</span>
+            </a>
+            <div class="nav-links">
+                <a href="/index.html">← Back to Public Website</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="auth-wrapper">
+            <div class="auth-card" style="box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
+                <div class="auth-header">
+                    <span style="display: inline-block; background: #eff6ff; color: #1d4ed8; font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; margin-bottom: 0.75rem;">
+                        RESTRICTED ACCESS
+                    </span>
+                    <h2>Staff Administration</h2>
+                    <p>Enter administrator credentials to access the central train control board</p>
+                </div>
+
+                <div id="alert-box"></div>
+
+                <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="username">Admin Username or Email</label>
+                        <input type="text" id="username" class="form-control" placeholder="e.g., admin" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="password">Security Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" id="admin-btn" class="btn btn-primary btn-block" style="background: #1d4ed8;">
+                        Authorize Access ➔
+                    </button>
+                </form>
+
+                <div style="margin-top: 1.5rem; background: #f8fafc; border: 1px dashed var(--border-color); border-radius: 6px; padding: 0.85rem; font-size: 0.82rem; color: var(--text-muted);">
+                    <strong>Academic Default Credentials:</strong><br>
+                    Username: <code style="color: var(--primary);">admin</code> &nbsp;|&nbsp; Password: <code style="color: var(--primary);">admin123</code>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer" style="background: #081220;">
+        <p>© 2026 Railway Ticket Reservation System • Administrative Operations Module</p>
+    </footer>
+
+    <script src="/js/validation.js"></script>
+    <script>
+        // Check if admin is already authorized
+        if (Session.getAdmin()) {
+            window.location.href = '/admin_dashboard.html';
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            clearAlert();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('admin-btn');
+
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
+
+            const res = await API.post('/api/admin/login', { username, password });
+
+            btn.disabled = false;
+            btn.innerText = "Authorize Access ➔";
+
+            if (res.success) {
+                Session.setAdmin(res.admin, res.session_token);
+                window.location.href = '/admin_dashboard.html';
+            } else {
+                showAlert(res.error || "Authentication failed. Unauthorized.", "danger");
+            }
+        }
+    </script>
+</body>
+</html>
